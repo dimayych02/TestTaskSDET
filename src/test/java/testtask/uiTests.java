@@ -42,11 +42,12 @@ public class uiTests extends browserConfiguration {
 
         String actualResult  = driver.findElement(By.className("complete-header")).getText();
 
+
         String CurrentUrl = driver.getCurrentUrl();
 
         softAssert.get().assertEquals(CurrentUrl,"https://www.saucedemo.com/checkout-complete.html"); // мягкая проверка на текущий URL
 
-        softAssert.get().assertEquals(actualResult,"THANK YOU FOR YOUR ORDER"); // мягкая проверка на  соответствие текста
+        softAssert.get().assertEquals(actualResult,"Thank you for your order!"); // мягкая проверка на  соответствие текста
 
         softAssert.get().assertAll();
 
