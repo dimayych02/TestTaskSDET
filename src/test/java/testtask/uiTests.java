@@ -1,78 +1,84 @@
 package testtask;
 
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 
-public class uiTests extends browserConfiguration {
+public class uiTests  {
+
+    public SoftAssert softAssert;
+
+    public static LoginPage loginPage;
+    public static PurchaseGood purchaseGood;
+    public static WebDriver driver;
+
+    @BeforeMethod
+    public void Configuration(){
+
+        softAssert = new SoftAssert();
+
+        driver = new ChromeDriver();
+
+        loginPage = new LoginPage(driver);
+
+        purchaseGood = new PurchaseGood(driver);
+
+    }
 
     @Test
-    public void testCase1(){
+    public void testCase1() {
 
         driver.get("https://www.saucedemo.com/");
 
-        driver.findElement(By.cssSelector("input[id='user-name']")).sendKeys("standard_user");
+        loginPage.Authorization("standard_user","secret_sauce");
 
-        driver.findElement(By.id("password")).sendKeys("secret_sauce");
+        purchaseGood.AddingGood();
 
-        driver.findElement(By.xpath("//input[@type='submit']")).click();
+        purchaseGood.FillForm("test","test","test");
 
-        driver.findElements(By.xpath("//button[text()='Add to cart']")).get(0).click();
+        softAssert.assertEquals(purchaseGood.CheckText(),"Thank you for your order!");
 
-        driver.findElement(By.cssSelector("a[class=\"shopping_cart_link\"]")).click();
+        softAssert.assertEquals(purchaseGood.CheckCurrentUrl(),"https://www.saucedemo.com/checkout-complete.html");
 
-        driver.findElement(By.id("checkout")).click();
-
-        driver.findElement(By.id("first-name")).sendKeys("test");
-
-        driver.findElement(By.cssSelector("input[id=\"last-name\"]")).sendKeys("test");
-
-        driver.findElement(By.xpath("//input[@id=\"postal-code\"]")).sendKeys("test");
-
-        driver.findElement(By.name("continue")).click();
-
-        JavascriptExecutor javascriptExecutor =(JavascriptExecutor) driver; //скроллинг страницы вниз
-
-        javascriptExecutor.executeScript("window.scrollBy(0,600)");
-
-        driver.findElement(By.xpath("//button[text()='Finish']")).click();
-
-
-        String actualResult  = driver.findElement(By.className("complete-header")).getText();
-
-
-        String CurrentUrl = driver.getCurrentUrl();
-
-        softAssert.get().assertEquals(CurrentUrl,"https://www.saucedemo.com/checkout-complete.html"); // мягкая проверка на текущий URL
-
-        softAssert.get().assertEquals(actualResult,"Thank you for your order!"); // мягкая проверка на  соответствие текста
-
-        softAssert.get().assertAll();
+        softAssert.assertAll();
 
 
 
     }
+
     @Test
-    public void testCase2(){
+    public void testCase2() {
 
         driver.get("https://www.saucedemo.com/");
 
-        driver.findElement(By.id("user-name")).sendKeys("test");
+        loginPage.Authorization("test","test");
 
-        driver.findElement(By.id("password")).sendKeys("test");
+        softAssert.assertEquals(loginPage.getInvalidMessage(),"Epic sadface: Username and password do not match any user in this service");
 
-        driver.findElement(By.xpath("//input[@type='submit']")).click();
+        softAssert.assertAll();
 
 
-        String ErrorMessage = driver.findElement(By.cssSelector("h3[data-test=\"error\"]")).getText();
 
-        softAssert.get().assertEquals(ErrorMessage,"Epic sadface: Username and password do not match any user in this service");
 
-        //мягкая проверка на соответствие текста
+    }
+    @AfterMethod
+    public void tearDown(){
 
-        softAssert.get().assertAll();
+        softAssert = null;
+
+        if(driver!=null){  //закрытие браузера после каждого теста
+
+            driver.close();
+
+            driver=null;
+        }
+
+
     }
 
 }
